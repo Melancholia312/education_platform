@@ -1,13 +1,15 @@
 package com.melancholia.educationplatform.course;
 
 
-import com.melancholia.educationplatform.review.Review;
+import com.melancholia.educationplatform.course.module.Module;
+import com.melancholia.educationplatform.course.review.Review;
 import com.melancholia.educationplatform.user.User;
-import com.melancholia.educationplatform.step.Step;
+import com.melancholia.educationplatform.course.step.Step;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -26,14 +28,17 @@ public class Course {
     )
     private long id;
 
-    @Column(name = "id", nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
     @Column(name = "price")
     private double price;
 
-    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
-    private List<Step> steps;
+    @Column(name = "comments_allowed")
+    private boolean commentsAllowed;
+
+    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Module> modules;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -43,9 +48,13 @@ public class Course {
     )
     private List<User> users;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id")
-    private User author;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "course_authors",
+            joinColumns = @JoinColumn(name = "course_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private List<User> authors = new ArrayList<>();
 
     @Column(name = "description")
     private String description;
@@ -57,12 +66,10 @@ public class Course {
     private Date creationDate;
 
     @Column(name = "is_published")
-    private boolean isPublished;
+    private boolean isPublished = false;
 
-    public Course(String name, double price, String description) {
-        this.name = name;
-        this.price = price;
-        this.description = description;
+
+    public void addAuthor(User user){
+        authors.add(user);
     }
-
 }

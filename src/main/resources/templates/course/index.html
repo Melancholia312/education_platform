@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div>
+    <table border="1">
+        <tr>
+            <th>Номер</th>
+            <th>Название</th>
+            <th>Участники</th>
+            <th>Отзывы</th>
+        </tr>
+        <tr th:if="${#lists.size(list)!=0}" th:each ="i : ${#numbers.sequence(0, #lists.size(list)-1)}">
+            <td th:utext="${list[i].getId()}">...</td>
+            <td th:utext="${list[i].getName()}">...</td>
+            <td th:utext="${list[i].getAuthor()}">...</td>
+            <td th:utext="${list[i].getReviews()}">...</td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>

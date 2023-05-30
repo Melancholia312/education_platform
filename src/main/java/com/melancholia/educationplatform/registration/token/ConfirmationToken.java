@@ -1,7 +1,6 @@
 package com.melancholia.educationplatform.registration.token;
 
 import com.melancholia.educationplatform.user.User;
-import com.melancholia.educationplatform.user.UserPrincipal;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;

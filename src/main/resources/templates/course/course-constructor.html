@@ -1,0 +1,119 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>List Modules</title>
+
+    <link rel="stylesheet"
+          type="text/css"
+          href="https://cdn.datatables.net/v/bs4/dt-1.10.25/datatables.min.css"/>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+          integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l"
+          crossorigin="anonymous"/>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h3 th:object="${course}" th:text="${'Course ' + course.name + ' modules'}"></h3>
+
+    <hr/>
+    <a th:href="@{/module/add (courseId=${course.id})}" class="btn btn-primary">Create module</a>
+    <br/><br/>
+
+
+    <form th:action="@{/module/switch (courseId=${course.id})}" th:object="${modules}"
+          method="POST">
+        <table class="table table-bordered table-striped" id="moduleTable">
+            <thead>
+            <tr>
+                <th></th>
+                <th>Name</th>
+                <th>Steps Count</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="module, itemStat : *{modules}" class="float-child">
+                <td><input type="hidden" th:field="*{modules[__${itemStat.index}__].moduleNumber}"/>
+                    <input type="hidden" th:field="*{modules[__${itemStat.index}__].id}"/>
+                </td>
+                <td th:text="*{modules[__${itemStat.index}__].name}"> </td>
+                <td>
+                    <p th:text="${#lists.size(module.steps)}"></p>
+                    <hr>
+                    <a th:href="@{/module/{id}/steps (id = ${module.id}, courseId=${module.course.id}) }"
+                       class="btn btn-primary">View All Steps</a>
+                </td>
+                <td>
+
+                    <a th:href="@{/step/add (moduleId = ${module.id}, courseId=${module.course.id}, type='lection-step') }"
+                       class="btn btn-primary">Add Lection Step</a>
+                    <a th:href="@{/step/add (moduleId = ${module.id}, courseId=${module.course.id}, type='word-answer-step') }"
+                       class="btn btn-primary">Add Word Answer Step</a>
+                    <a th:href="@{/step/add (moduleId = ${module.id}, courseId=${module.course.id}, type='test-step') }"
+                       class="btn btn-primary">Add Test Step</a>
+                    <hr>
+                    <a th:href="@{/module/{id}/edit (id = ${module.id}, courseId=${module.course.id}) }"
+                       class="btn btn-info">Update</a>
+                    <a th:href="@{/module/{id}/delete (id = ${module.id}, courseId=${module.course.id}) }"
+                       class="btn btn-danger">Delete</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <button type="submit" class="btn btn-primary col-2">Save changes</button>
+    </form>
+
+    <a th:href="@{/my-courses}">Back to my courses</a>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.25/datatables.min.js"></script>
+<script>
+const ELS = (sel, par) => (par || document).querySelectorAll(sel);
+const ELS_child = ELS(".float-child");
+
+let EL_drag; // Used to remember the dragged element
+
+const addEvents = (EL_ev) => {
+  EL_ev.setAttribute("draggable", "true");
+  EL_ev.addEventListener("dragstart", onstart);
+  EL_ev.addEventListener("dragover", (ev) => ev.preventDefault());
+  EL_ev.addEventListener("drop", ondrop);
+};
+
+const onstart = (ev) => EL_drag = ev.currentTarget;
+
+const ondrop = (ev) => {
+  if (!EL_drag) return;
+
+  ev.preventDefault();
+
+  const EL_targ = ev.currentTarget;
+  const EL_targClone = EL_targ.cloneNode(true);
+  const EL_dragClone = EL_drag.cloneNode(true);
+
+  const targCloneValue = EL_targClone.childNodes[1].firstChild.value;
+  const dragCloneValue = EL_dragClone.childNodes[1].firstChild.value;
+
+  EL_targ.replaceWith(EL_dragClone);
+  EL_drag.replaceWith(EL_targClone);
+
+  EL_targClone.childNodes[1].firstChild.value = dragCloneValue;
+  EL_dragClone.childNodes[1].firstChild.value = targCloneValue;
+
+  addEvents(EL_targClone); // Reassign events to cloned element
+  addEvents(EL_dragClone); // Reassign events to cloned element
+
+  EL_drag = undefined;
+};
+
+ELS_child.forEach((EL_child) => addEvents(EL_child));
+
+
+</script>
+</body>
+
+</html>

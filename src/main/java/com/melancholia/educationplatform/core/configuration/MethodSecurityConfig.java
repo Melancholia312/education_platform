@@ -1,6 +1,6 @@
 package com.melancholia.educationplatform.core.configuration;
 
-import com.melancholia.educationplatform.permissions.CustomPermissionEvaluator;
+import com.melancholia.educationplatform.user.permissions.CustomPermissionEvaluator;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;

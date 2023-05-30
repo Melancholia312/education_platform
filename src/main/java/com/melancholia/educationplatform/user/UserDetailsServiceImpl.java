@@ -1,13 +1,14 @@
 package com.melancholia.educationplatform.user;
 
+import com.melancholia.educationplatform.registration.email.EmailSender;
+import com.melancholia.educationplatform.user.permissions.PrivilegeRepository;
 import com.melancholia.educationplatform.registration.token.ConfirmationToken;
 import com.melancholia.educationplatform.registration.token.ConfirmationTokenService;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,15 +23,20 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
     private final ConfirmationTokenService confirmationTokenService;
 
+    private final EmailSender emailSender;
+
+    private final PrivilegeRepository privilegeRepository;
+
     @Override
     public UserDetails loadUserByUsername(String email) {
         User user = userRepository.findByEmail(email);
         if (user == null) {
             throw new UsernameNotFoundException(email);
         }
-        return new UserPrincipal(user);
+        return user;
     }
 
+    @Transactional
     public String signUpUser(User user) {
         User userExists = userRepository
                 .findByEmail(user.getEmail());
@@ -46,7 +52,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .encode(user.getPassword());
 
         user.setPassword(encodedPassword);
-
         userRepository.save(user);
 
         String token = UUID.randomUUID().toString();
@@ -69,4 +74,5 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public int enableAppUser(String email) {
         return userRepository.enableAppUser(email);
     }
+
 }

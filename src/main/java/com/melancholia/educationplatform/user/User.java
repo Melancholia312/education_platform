@@ -1,22 +1,23 @@
 package com.melancholia.educationplatform.user;
 
 import com.melancholia.educationplatform.course.Course;
-import com.melancholia.educationplatform.review.Review;
-import com.melancholia.educationplatform.permissions.Privilege;
+import com.melancholia.educationplatform.course.review.Review;
+import com.melancholia.educationplatform.user.permissions.Privilege;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity(name = "User")
 @Table(name = "user")
 @Data
 @NoArgsConstructor
-public class User {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,6 +44,9 @@ public class User {
     @ManyToMany(mappedBy = "users", fetch = FetchType.LAZY)
     private List<Course> courses;
 
+    @ManyToMany(mappedBy = "authors", fetch = FetchType.LAZY)
+    private List<Course> authorOfCourses;
+
     @OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     private List<Review> reviews;
 
@@ -66,5 +70,34 @@ public class User {
         this.email = email;
         this.password = password;
         this.phone = phone;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        for (Privilege privilege : privileges) {
+            authorities.add(new SimpleGrantedAuthority(privilege.getName()));
+        }
+        return authorities;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return !locked;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
     }
 }

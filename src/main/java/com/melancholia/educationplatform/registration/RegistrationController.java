@@ -14,7 +14,7 @@ public class RegistrationController {
 
     @GetMapping
     public String register() {
-        return register(new User("username", "qwe123@mail.ru", "123", "+79603566081"));
+        return register(new User("username", "melancholia200312@gmail.com", "123", "+79603566081"));
     }
 
     @PostMapping

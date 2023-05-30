@@ -1,0 +1,34 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Add Answer</title>
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+          integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l"
+          crossorigin="anonymous" />
+</head>
+<body>
+
+<div class="container">
+    <h2 th:object="${step}" th:text="'Adding answer to Test Step with question - ' + ${step.question}"></h2>
+
+    <form th:action="@{/test-step/answer/add (courseId=${step.module.course.id}, testStepId=${step.id} ) }" th:object="${answer}" method="POST">
+        <h3>New Answer</h3>
+        <hr/>
+        <input type="hidden" th:field="*{id}"/>
+
+        <p>Is Correct</p>
+        <input type="checkbox" name="isCorrect1" th:checked="*{isCorrect}" class="form-control col-1 mb-4"/>
+
+        <input type="text" th:field="*{answerText}" class="form-control col-4 mb-4" placeholder="Answer Text" />
+
+        <button type="submit" class="btn btn-primary col-2">Save</button>
+    </form>
+
+    <hr/>
+    <a th:href="@{/test-step/{id}/answers ( id=${step.id}, courseId=${step.module.course.id} ) }">Back to answers</a>
+</div>
+
+</body>
+</html>

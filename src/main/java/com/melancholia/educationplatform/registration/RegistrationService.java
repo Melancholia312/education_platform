@@ -1,12 +1,11 @@
 package com.melancholia.educationplatform.registration;
 
 
-import com.melancholia.educationplatform.email.EmailSender;
+import com.melancholia.educationplatform.registration.email.EmailSender;
 import com.melancholia.educationplatform.registration.token.ConfirmationToken;
 import com.melancholia.educationplatform.registration.token.ConfirmationTokenService;
 import com.melancholia.educationplatform.user.User;
 import com.melancholia.educationplatform.user.UserDetailsServiceImpl;
-import com.melancholia.educationplatform.user.UserPrincipal;
 import lombok.AllArgsConstructor;
 import org.hibernate.validator.internal.constraintvalidators.bv.EmailValidator;
 import org.springframework.stereotype.Service;
