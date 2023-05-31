@@ -127,9 +127,9 @@ public class StepController {
     @GetMapping("/module/{id}/steps")
     public String viewMySteps(@PathVariable("id") long id,
                               Model model) {
+        model.addAttribute("module", moduleService.findModuleToConstructById(id));
         StepsWrapper stepsWrapper = new StepsWrapper(stepService.findStepsByModuleId(id));
         model.addAttribute("steps", stepsWrapper);
-        model.addAttribute("module", moduleService.findModuleToConstructById(id));
         return "step/all-steps";
     }
 
@@ -177,16 +177,18 @@ public class StepController {
     @GetMapping("/test-step/{id}/answers")
     public String getTestStepAnswers(@PathVariable("id") long id,
                                      Model model) {
-        model.addAttribute("answers", answerService.findAnswerByTestStepId(id));
+
         model.addAttribute("step", stepService.findStepToConstructById(id));
+        model.addAttribute("answers", answerService.findAnswerByTestStepId(id));
         return "step/all-answers";
     }
 
     @GetMapping("/test-step/answer/add")
     public String addTestStepAnswer(@RequestParam(name = "testStepId") long testStepId,
                                     Model model) {
-        model.addAttribute("answer", new Answer());
+
         model.addAttribute("step", stepService.findStepToConstructById(testStepId));
+        model.addAttribute("answer", new Answer());
         return "step/add-answer";
     }
 
@@ -215,8 +217,9 @@ public class StepController {
     public String editModule(@RequestParam(name = "answerId") long answerId,
                              @RequestParam(name = "stepId") long stepId,
                              Model model) {
-        model.addAttribute("answer", answerService.findAnswerToConstructById(answerId));
+
         model.addAttribute("step", stepService.findStepToConstructById(stepId));
+        model.addAttribute("answer", answerService.findAnswerToConstructById(answerId));
         return "step/edit-answer";
     }
 
@@ -224,8 +227,9 @@ public class StepController {
     public String deleteAnswerForm(@RequestParam(name = "answerId") long answerId,
                                    @RequestParam(name = "stepId") long stepId,
                                    Model model) {
-        model.addAttribute("answer", answerService.findAnswerToConstructById(answerId));
+
         model.addAttribute("step", stepService.findStepToConstructById(stepId));
+        model.addAttribute("answer", answerService.findAnswerToConstructById(answerId));
         return "step/delete-answer";
     }
 

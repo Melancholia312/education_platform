@@ -5,6 +5,7 @@ import com.melancholia.educationplatform.core.exception.ModuleNotFoundException;
 import com.melancholia.educationplatform.course.Course;
 import com.melancholia.educationplatform.course.CourseRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,7 @@ public class ModuleService {
         moduleRepository.deleteById(id);
     }
 
-    @PreAuthorize("hasPermission(#id, 'Module', 'write')")
+    @PostAuthorize("hasPermission(#id, 'Module', 'write')")
     public Module findModuleToConstructById(long id){
         return findModuleById(id);
     }

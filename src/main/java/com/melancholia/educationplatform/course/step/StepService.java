@@ -4,6 +4,7 @@ import com.melancholia.educationplatform.core.exception.ModuleNotFoundException;
 import com.melancholia.educationplatform.core.exception.StepNotFoundException;
 import com.melancholia.educationplatform.course.module.Module;
 import lombok.AllArgsConstructor;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +21,7 @@ public class StepService {
         stepRepository.save(step);
     }
 
-    @PreAuthorize("hasPermission(#id, 'Step', 'write')")
+    @PostAuthorize("hasPermission(#id, 'Step', 'write')")
     public Step findStepToConstructById(long id){
         return findStepById(id);
     }

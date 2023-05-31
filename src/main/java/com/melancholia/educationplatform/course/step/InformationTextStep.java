@@ -17,4 +17,7 @@ public class InformationTextStep extends Step {
     @Column(name = "lectionText", nullable = false)
     private String lectionText;
 
+    /*@Column(name = "lectionText", nullable = false)
+    private String video;*/
+
 }

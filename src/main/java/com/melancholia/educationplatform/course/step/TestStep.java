@@ -27,6 +27,9 @@ public class TestStep extends Step {
     @OneToMany(mappedBy = "step", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Solution> solutions;
 
+    /*@Column(name = "lectionText", nullable = false)
+    private String image;*/
+
     public TestStep(String question, boolean multiAnswers) {
         this.question = question;
         this.multiAnswers = multiAnswers;

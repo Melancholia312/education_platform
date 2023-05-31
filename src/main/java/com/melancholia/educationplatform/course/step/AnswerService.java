@@ -4,6 +4,7 @@ import com.melancholia.educationplatform.core.exception.AnswerNotFoundException;
 import com.melancholia.educationplatform.core.exception.ModuleNotFoundException;
 import com.melancholia.educationplatform.course.module.Module;
 import lombok.AllArgsConstructor;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +21,7 @@ public class AnswerService {
         return answerRepository.findAnswerByTestStepId(testStepId);
     }
 
-    @PreAuthorize("hasPermission(#answerId, 'Answer', 'write')")
+    @PostAuthorize("hasPermission(#answerId, 'Answer', 'write')")
     public Answer findAnswerToConstructById(long answerId){
         return findAnswerById(answerId);
     }

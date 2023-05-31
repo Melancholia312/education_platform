@@ -23,4 +23,6 @@ public class WordAnswerStep extends Step {
     @OneToMany(mappedBy = "step", fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     private List<Solution> solutions;
 
+    /*@Column(name = "lectionText", nullable = false)
+    private String image;*/
 }

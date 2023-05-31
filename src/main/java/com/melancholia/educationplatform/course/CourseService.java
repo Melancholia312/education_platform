@@ -3,6 +3,7 @@ package com.melancholia.educationplatform.course;
 import com.melancholia.educationplatform.core.exception.CourseNotFoundException;
 import com.melancholia.educationplatform.user.User;
 import lombok.AllArgsConstructor;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,7 @@ public class CourseService {
         );
     }
 
-    @PreAuthorize("hasPermission(#id, 'Course', 'write')")
+    @PostAuthorize("hasPermission(#id, 'Course', 'write')")
     public Course findCourseToConstructById(long id){
         return findCourseById(id);
     }
