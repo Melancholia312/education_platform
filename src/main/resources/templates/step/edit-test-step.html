@@ -11,23 +11,23 @@
 <body>
 
 <div class="container">
-  <h2 th:text="${'Adding step to module ' + step.module.name}"></h2>
+  <h2 th:text="${'Добавление тестового вопросу к модулю - ' + step.module.name}"></h2>
 
-  <form th:action="@{/step/add-test (courseId=${step.module.course.id}, moduleId=${step.module.id}) }" th:object="${step}"
+  <form th:action="@{/step/add-test ( moduleId=${step.module.id}) }" th:object="${step}"
         method="POST">
 
-    <h3>New Test Step</h3>
+    <h3>Новый тестовый вопрос</h3>
     <hr/>
     <input type="hidden" th:field="*{id}"/>
     <input type="hidden" th:field="*{stepNumber}"/>
-    <input th:field="*{question}" class="form-control col-4 mb-4" placeholder="Question">
-    <p>Multi Answers</p>
+    <input th:field="*{question}" class="form-control col-4 mb-4" placeholder="Вопрос">
+    <p>Больше 1 правильного ответа</p>
     <input type="checkbox" name="multiAnswers" th:checked="*{multiAnswers}" class="form-control col-1 mb-4"/>
-    <button type="submit" class="btn btn-primary col-2">Save</button>
+    <button type="submit" class="btn btn-primary col-2">Сохранить</button>
 
   </form>
   <hr/>
-  <a th:href="@{/course/{id}/constructor (id = ${step.module.course.id})}">Back to course</a>
+  <a th:href="@{/course/{id}/constructor (id = ${step.module.course.id})}">Обратно к курсу</a>
 </div>
 
 </body>

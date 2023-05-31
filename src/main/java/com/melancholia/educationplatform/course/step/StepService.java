@@ -16,18 +16,17 @@ public class StepService {
     private final StepRepository stepRepository;
 
 
-    @PreAuthorize("hasPermission(#courseId, 'Course', 'write')")
-    public void stepSave(long courseId, Step step){
+    public void stepSave(Step step){
         stepRepository.save(step);
     }
 
-    @PreAuthorize("hasPermission(#courseId, 'Course', 'write')")
-    public Step findStepToConstructById(long courseId, long id){
+    @PreAuthorize("hasPermission(#id, 'Step', 'write')")
+    public Step findStepToConstructById(long id){
         return findStepById(id);
     }
 
-    @PreAuthorize("hasPermission(#courseId, 'Course', 'write')")
-    public void deleteStepById(long courseId, long id){
+    @PreAuthorize("hasPermission(#step.id, 'Step', 'write')")
+    public void deleteStepById(long id){
         stepRepository.deleteById(id);
     }
 
@@ -38,12 +37,13 @@ public class StepService {
         );
     }
 
-    @PreAuthorize("hasPermission(#courseId, 'Course', 'write')")
-    public void updateStepNumber(long courseId, long stepId, long stepNumber){
+    @PreAuthorize("hasPermission(#stepId, 'Step', 'write')")
+    public void updateStepNumber(long stepId, long stepNumber){
         stepRepository.updateStepNumber(stepNumber, stepId);
     }
-    @PreAuthorize("hasPermission(#courseId, 'Course', 'write')")
-    public List<Step> findStepsByModuleId(long courseId, long moduleId){
+
+    @PreAuthorize("hasPermission(#moduleId, 'Module', 'write')")
+    public List<Step> findStepsByModuleId(long moduleId){
         return stepRepository.findStepsByModuleIdOrderByStepNumber(moduleId);
     }
 

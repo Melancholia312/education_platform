@@ -1,7 +1,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <title>List of Steps</title>
+    <title>Уроки</title>
 
     <link rel="stylesheet"
           type="text/css"
@@ -16,27 +16,27 @@
 
 <div class="container">
 
-    <h3 th:object="${module}" th:text="${'Module ' + module.name + ' steps'}"></h3>
+    <h3 th:object="${module}" th:text="${'Уроки модуля ' + module.name}"></h3>
 
     <hr/>
-    <a th:href="@{/step/add (moduleId = ${module.id}, courseId=${module.course.id}, type='lection-step') }"
-       class="btn btn-primary">Add Lection Step</a>
-    <a th:href="@{/step/add (moduleId = ${module.id}, courseId=${module.course.id}, type='word-answer-step') }"
-       class="btn btn-primary">Add Word Answer Step</a>
-    <a th:href="@{/step/add (moduleId = ${module.id}, courseId=${module.course.id}, type='test-step') }"
-       class="btn btn-primary">Add Test Step</a>
+    <a th:href="@{/step/add (moduleId = ${module.id}, type='lection-step') }"
+       class="btn btn-primary">Добавить лекцию</a>
+    <a th:href="@{/step/add (moduleId = ${module.id}, type='word-answer-step') }"
+       class="btn btn-primary">Добавить вопрос</a>
+    <a th:href="@{/step/add (moduleId = ${module.id}, type='test-step') }"
+       class="btn btn-primary">Добавить тестовый вопрос</a>
     <br/><br/>
 
-    <form th:action="@{/steps/switch ( courseId=${module.course.id}, moduleId=${module.id} )}" th:object="${steps}"
+    <form th:action="@{/steps/switch ( moduleId=${module.id} )}" th:object="${steps}"
           method="POST">
         <table class="table table-bordered table-striped" id="stepTable">
             <thead>
             <tr>
                 <th></th>
-                <th>Type</th>
-                <th>Question / Lection text</th>
-                <th>Answer</th>
-                <th>Actions</th>
+                <th>Тип урока</th>
+                <th>Вопрос / Краткий текст лекции</th>
+                <th>Ответ</th>
+                <th>Действия</th>
             </tr>
             </thead>
             <tbody>
@@ -61,9 +61,9 @@
 
 
                 <td th:switch="${step.class.simpleName}">
-                    <p th:case=" 'InformationTextStep' ">Lection Step</p>
-                    <p th:case=" 'WordAnswerStep' ">Word Answer Step</p>
-                    <p th:case=" 'TestStep' ">Test Step</p>
+                    <p th:case=" 'InformationTextStep' ">Лекция</p>
+                    <p th:case=" 'WordAnswerStep' ">Вопрос</p>
+                    <p th:case=" 'TestStep' ">Тестовый вопрос</p>
                 </td>
 
                 <td th:switch="${step.class.simpleName}">
@@ -77,26 +77,26 @@
                     <p th:case=" 'WordAnswerStep' " th:text="${step.answer}"></p>
 
                     <span th:case=" 'TestStep' ">
-                        <a th:href="@{/test-step/{id}/answers (id=${step.id}, courseId=${module.course.id} ) }" class="btn btn-primary">View Test Answers</a>
-                        <a th:href="@{/test-step/answer/add (testStepId=${step.id}, courseId=${module.course.id} ) }"
-                           class="btn btn-primary">Add Answer</a>
+                        <a th:href="@{/test-step/{id}/answers (id=${step.id}) }" class="btn btn-primary">Посмотреть ответы</a>
+                        <a th:href="@{/test-step/answer/add (testStepId=${step.id}) }"
+                           class="btn btn-primary">Добавить ответы</a>
                     </span>
 
                 </td>
 
                 <td>
-                    <a th:href="@{/step/{id}/edit (id = ${step.id}, courseId=${module.course.id}, type=${step.class.simpleName}) }"
-                       class="btn btn-info">Update</a>
-                    <a th:href="@{/step/{id}/delete (id = ${step.id}, courseId=${module.course.id}) }"
-                       class="btn btn-danger">Delete</a>
+                    <a th:href="@{/step/{id}/edit (id = ${step.id}, type=${step.class.simpleName}) }"
+                       class="btn btn-info">Редактировать</a>
+                    <a th:href="@{/step/{id}/delete (id = ${step.id}) }"
+                       class="btn btn-danger">Удалить</a>
                 </td>
             </tr>
             </tbody>
         </table>
-        <button type="submit" class="btn btn-primary col-2">Save changes</button>
+        <button type="submit" class="btn btn-primary col-2">Сохранить изменения</button>
     </form>
 
-    <a th:href="@{/course/{id}/constructor (id = ${module.course.id}) }">Back to my modules</a>
+    <a th:href="@{/course/{id}/constructor (id = ${module.course.id}) }">Обратно к модулям</a>
 </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>

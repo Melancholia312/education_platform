@@ -4,6 +4,7 @@ import com.melancholia.educationplatform.course.Course;
 import com.melancholia.educationplatform.course.CourseService;
 import com.melancholia.educationplatform.user.permissions.PrivilegeService;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -31,35 +32,42 @@ public class ModuleController {
 
     @PostMapping("/module/add")
     public String createModule(@RequestParam(name = "courseId") long courseId,
-                               @ModelAttribute
-                               Module module){
+                               @ModelAttribute Module module,
+                               Authentication authentication){
         Course course = courseService.findCourseToConstructById(courseId);
         module.setCourse(course);
         if (module.getId() == 0) module.setModuleNumber(moduleService.maxModuleNumberCourseId(courseId)+1);
 
-        moduleService.moduleSave(courseId, module);
-
+        moduleService.moduleSave(module);
+        privilegeService.addPermissionToUser(
+                authentication,
+                Module.class.getSimpleName(),
+                String.valueOf(module.getId()),
+                "read");
+        privilegeService.addPermissionToUser(
+                authentication,
+                Module.class.getSimpleName(),
+                String.valueOf(module.getId()),
+                "write");
         return String.format("redirect:/course/%s/constructor", courseId);
     }
 
     @GetMapping("/module/{id}/edit")
-    public String editModule(@RequestParam(name = "courseId") long courseId,
-                             @PathVariable("id") long id, Model model){
-        model.addAttribute("module", moduleService.findModuleToConstructById(courseId, id));
+    public String editModule(@PathVariable("id") long id, Model model){
+        model.addAttribute("module", moduleService.findModuleToConstructById(id));
         return "module/edit";
     }
 
     @GetMapping("/module/{id}/delete")
-    public String deleteModuleForm(@RequestParam(name = "courseId") long courseId,
-                                   @PathVariable("id") long id, Model model){
-        model.addAttribute("module", moduleService.findModuleToConstructById(courseId, id));
+    public String deleteModuleForm(@PathVariable("id") long id, Model model){
+        model.addAttribute("module", moduleService.findModuleToConstructById(id));
         return "module/delete";
     }
 
     @PostMapping("/module/{id}/delete")
     public String deleteModule(@RequestParam(name = "courseId") long courseId,
                                @PathVariable("id") long id){
-        moduleService.deleteModuleById(courseId, id);
+        moduleService.deleteModuleById(id);
         return String.format("redirect:/course/%s/constructor", courseId);
     }
 
@@ -67,7 +75,7 @@ public class ModuleController {
     public String switchModules(@RequestParam(name = "courseId") long courseId,
                                 @ModelAttribute ModulesWrapper modules){
         for (Module module : modules.getModules()){
-            moduleService.updateModuleNumber(courseId, module.getId(), module.getModuleNumber());
+            moduleService.updateModuleNumber(module.getId(), module.getModuleNumber());
         }
         return String.format("redirect:/course/%s/constructor", courseId);
     }

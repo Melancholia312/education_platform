@@ -22,23 +22,22 @@ public class ModuleService {
         return moduleRepository.findByCourseIdOrderByModuleNumber(courseId);
     }
 
-    @PreAuthorize("hasPermission(#courseId, 'Course', 'write')")
-    public void moduleSave(long courseId, Module module){
+    public void moduleSave(Module module){
         moduleRepository.save(module);
     }
 
-    @PreAuthorize("hasPermission(#courseId, 'Course', 'write')")
-    public void deleteModuleById(long courseId, long id){
+    @PreAuthorize("hasPermission(#id, 'Module', 'write')")
+    public void deleteModuleById(long id){
         moduleRepository.deleteById(id);
     }
 
-    @PreAuthorize("hasPermission(#courseId, 'Course', 'write')")
-    public Module findModuleToConstructById(long courseId, long id){
+    @PreAuthorize("hasPermission(#id, 'Module', 'write')")
+    public Module findModuleToConstructById(long id){
         return findModuleById(id);
     }
 
-    @PreAuthorize("hasPermission(#courseId, 'Course', 'write')")
-    public void updateModuleNumber(long courseId, long moduleId, long moduleNumber){
+    @PreAuthorize("hasPermission(#moduleId, 'Module', 'write')")
+    public void updateModuleNumber(long moduleId, long moduleNumber){
         moduleRepository.updateModuleNumber(moduleNumber, moduleId);
     }
 

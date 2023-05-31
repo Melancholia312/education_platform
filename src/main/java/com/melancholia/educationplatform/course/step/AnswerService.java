@@ -15,18 +15,18 @@ public class AnswerService {
 
     private final AnswerRepository answerRepository;
 
-    @PreAuthorize("hasPermission(#courseId, 'Course', 'write')")
-    public List<Answer> findAnswerByTestStepId(long courseId, long testStepId){
+    @PreAuthorize("hasPermission(#testStepId, 'Step', 'write')")
+    public List<Answer> findAnswerByTestStepId(long testStepId){
         return answerRepository.findAnswerByTestStepId(testStepId);
     }
 
-    @PreAuthorize("hasPermission(#courseId, 'Course', 'write')")
-    public Answer findAnswerToConstructById(long courseId, long answerId){
+    @PreAuthorize("hasPermission(#answerId, 'Answer', 'write')")
+    public Answer findAnswerToConstructById(long answerId){
         return findAnswerById(answerId);
     }
 
-    @PreAuthorize("hasPermission(#courseId, 'Course', 'write')")
-    public void deleteAnswerById(long courseId, long answerId){
+    @PreAuthorize("hasPermission(#answerId, 'Answer', 'write')")
+    public void deleteAnswerById(long answerId){
         answerRepository.deleteById(answerId);
     }
 
@@ -36,8 +36,7 @@ public class AnswerService {
         );
     }
 
-    @PreAuthorize("hasPermission(#courseId, 'Course', 'write')")
-    public void answerSave(long courseId, Answer answer){
+    public void answerSave(Answer answer){
         answerRepository.save(answer);
     }
 }

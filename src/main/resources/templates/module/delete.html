@@ -12,16 +12,16 @@
 
 <div class="container">
 
-    <h3>Delete Module</h3>
+    <h3>Удалить модуль</h3>
     <hr/>
 
     <form th:object="${module}" th:action="@{/module/{id}/delete (id = ${module.id} , courseId=${module.course.id}) }" method="POST">
-        <h4 th:text="${'Are you sure to delete module with name ' + module.name + '?'}"></h4>
-        <button type="submit" class="btn btn-primary col-2">Delete</button>
+        <h4 th:text="${'Вы уверены что хотите удалить модуль с названием ' + module.name + '?'}"></h4>
+        <button type="submit" class="btn btn-primary col-2">Удалить</button>
     </form>
 
     <hr/>
-    <a th:href="@{/course/{id}/constructor (id = ${module.course.id})}">Back to course</a>
+    <a th:href="@{/course/{id}/constructor (id = ${module.course.id})}">Обратно к курсу</a>
 </div>
 
 </body>

@@ -15,13 +15,13 @@
   <h3>Delete Step</h3>
   <hr/>
 
-  <form th:object="${step}" th:action="@{/step/{id}/delete (id = ${step.id}, moduleId=${step.module.id}, courseId=${step.module.course.id}) }" method="POST">
-    <h4>Are you sure to delete this step?</h4>
-    <button type="submit" class="btn btn-primary col-2">Delete</button>
+  <form th:object="${step}" th:action="@{/step/{id}/delete (id = ${step.id}, moduleId=${step.module.id}) }" method="POST">
+    <h4>Вы уверены, что хотите удалить этот урок?</h4>
+    <button type="submit" class="btn btn-primary col-2">Удалить</button>
   </form>
 
   <hr/>
-  <a th:href="@{/module/{id}/steps (id = ${step.module.id}, courseId=${step.module.course.id} )}">Back to module</a>
+  <a th:href="@{/module/{id}/steps (id = ${step.module.id} )}">Обратно к модулям</a>
 </div>
 
 </body>
