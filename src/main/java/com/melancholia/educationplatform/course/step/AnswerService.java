@@ -37,6 +37,10 @@ public class AnswerService {
         );
     }
 
+    public List<Answer> findCorrectAnswersByStepId(long id){
+        return answerRepository.findByTestStepIdAndCorrectTrue(id);
+    }
+
     public void answerSave(Answer answer){
         answerRepository.save(answer);
     }

@@ -6,12 +6,14 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Entity(name = "Review")
 @Table(name = "review")
 @Data
 @NoArgsConstructor
+@EqualsAndHashCode
 public class Review {
 
     @Id
@@ -25,9 +27,8 @@ public class Review {
     @Column(name = "reviewText", nullable = false)
     private String reviewText;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User author;
+    @Column(name = "author", nullable = false)
+    private String author;
 
     @ManyToOne
     @JoinColumn(name = "course_id")
@@ -37,12 +38,5 @@ public class Review {
     @Min(value=1)
     @Max(value=5)
     private int stars;
-
-    public Review(User author, String reviewText, Course course, int stars) {
-        this.reviewText = reviewText;
-        this.stars = stars;
-        this.author = author;
-        this.course = course;
-    }
 
 }

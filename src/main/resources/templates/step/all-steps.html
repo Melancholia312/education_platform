@@ -13,7 +13,41 @@
 </head>
 
 <body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light mb-5">
+    <a class="navbar-brand" href="/">Степик</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
 
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="/">Каталог</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Мое обучение</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/my-courses}">Мои курсы</a>
+            </li>
+
+        </ul>
+
+        <ul class="nav navbar-nav pull-right">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
+                    Username
+                </a>
+                <div class="dropdown-menu dropdown-menu-right">
+                    <a class="dropdown-item" href="#">Настройки</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="/logout">Выйти</a>
+                </div>
+            </li>
+        </ul>
+    </div>
+</nav>
 <div class="container">
 
     <h3 th:object="${module}" th:text="${'Уроки модуля ' + module.name}"></h3>
@@ -34,7 +68,7 @@
             <tr>
                 <th></th>
                 <th>Тип урока</th>
-                <th>Вопрос / Краткий текст лекции</th>
+                <th>Вопрос / Заголовок лекции</th>
                 <th>Ответ</th>
                 <th>Действия</th>
             </tr>
@@ -67,7 +101,7 @@
                 </td>
 
                 <td th:switch="${step.class.simpleName}">
-                    <p th:case=" 'InformationTextStep' " th:text="${step.lectionText}"></p>
+                    <p th:case=" 'InformationTextStep' " th:text="${step.name}"></p>
                     <p th:case=" 'WordAnswerStep' " th:text="${step.question}"></p>
                     <p th:case=" 'TestStep' " th:text="${step.question}"></p>
                 </td>
@@ -93,7 +127,7 @@
             </tr>
             </tbody>
         </table>
-        <button type="submit" class="btn btn-primary col-2">Сохранить изменения</button>
+        <button th:if="${#lists.size(steps.steps) > 1}" type="submit" class="btn btn-primary col-2">Сохранить изменения</button>
     </form>
 
     <a th:href="@{/course/{id}/constructor (id = ${module.course.id}) }">Обратно к модулям</a>

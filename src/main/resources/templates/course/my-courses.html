@@ -13,7 +13,41 @@
 </head>
 
 <body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light mb-5">
+  <a class="navbar-brand" href="/">Степик</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
 
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item">
+        <a class="nav-link" href="/">Каталог</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Мое обучение</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" th:href="@{/my-courses}">Мои курсы</a>
+      </li>
+
+    </ul>
+
+    <ul class="nav navbar-nav pull-right">
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
+          Username
+        </a>
+        <div class="dropdown-menu dropdown-menu-right">
+          <a class="dropdown-item" href="#">Настройки</a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="/logout">Выйти</a>
+        </div>
+      </li>
+    </ul>
+  </div>
+</nav>
 <div class="container">
 
   <h3>Ваши курсы</h3>
@@ -33,14 +67,24 @@
     </thead>
     <tbody>
     <tr th:each="course: ${courses}">
-      <td>
+      <td th:if="${!course.isPublished}">
         <a th:href="@{/course/{id}/constructor (id = ${course.id})}" th:text="${course.name}"></a>
+      </td>
+      <td th:if="${course.isPublished}">
+        <a th:href="@{/course/{id}/promo (id = ${course.id})}" th:text="${course.name}"></a>
       </td>
       <td th:text="${course.creationDate}"></td>
       <td th:text="${course.isPublished ? 'Опубликован' : 'Не Опубликован'}"></td>
       <td>
-        <a th:href="@{/course/{id}/edit (id = ${course.id})}" class="btn btn-info">Редактировать</a>
-        <a th:href="@{/course/{id}/delete (id = ${course.id})}" class="btn btn-danger">Удалить</a>
+        <a th:if="${!course.isPublished}" th:href="@{/course/{id}/edit (id = ${course.id})}" class="btn btn-info">Редактировать</a>
+        <a th:if="${!course.isPublished}" th:href="@{/course/{id}/delete (id = ${course.id})}" class="btn btn-danger">Удалить</a>
+        <hr th:if="${!course.isPublished}">
+        <form th:if="${!course.isPublished}" th:action="@{/course/{id}/publish (id = ${course.id})}" method="POST">
+          <button type="submit" class="btn btn-primary">Опубликовать</button>
+        </form>
+        <form th:if="${course.isPublished}" th:action="@{/course/{id}/close (id = ${course.id})}" method="POST">
+          <button type="submit" class="btn btn-danger">Снять с публикации</button>
+        </form>
       </td>
     </tr>
     </tbody>

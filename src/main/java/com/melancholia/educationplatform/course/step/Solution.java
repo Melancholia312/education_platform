@@ -1,4 +1,5 @@
 package com.melancholia.educationplatform.course.step;
+import com.melancholia.educationplatform.user.User;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -27,13 +28,15 @@ public class Solution {
     @Column(name = "solution_date")
     private Date solutionDate;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @Column(name = "solution_text")
+    private String solutionText;
+
+
     @Column(name = "is_solved_correct")
     private boolean isSolvedCorrect;
-
-    public Solution(Step step, Date solutionDate, boolean isSolvedCorrect) {
-        this.step = step;
-        this.solutionDate = solutionDate;
-        this.isSolvedCorrect = isSolvedCorrect;
-    }
 
 }

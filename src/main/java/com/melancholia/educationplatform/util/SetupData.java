@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
+
 @Component
 public class SetupData {
 
@@ -52,12 +54,18 @@ public class SetupData {
     }
 
     private void initCourses() {
-        /*User user = userRepository.findByEmail("qwe@mail.ru");
+        User user = userRepository.findByEmail("qwe@mail.ru");
         final Course course = new Course();
+        course.setName("qwe1");
+        course.setPublished(true);
+        course.setDescription("qwe");
+        course.setShortDescription("qwe");
         course.addAuthor(user);
+        course.setCreationDate(new Date());
         courseRepository.save(course);
-        final Course course1 = new Course();
-        courseRepository.save(course1);*/
+
+
+
     }
 
     private void initUsers() {

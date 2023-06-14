@@ -19,10 +19,13 @@ public class Answer {
     private Long id;
 
     @Column(name = "is_correct")
-    private boolean isCorrect;
+    private boolean correct;
 
     @Column(name = "answer_text", nullable = false)
     private String answerText;
+
+    @Column(name = "image")
+    private String image;
 
     @ManyToOne
     @JoinColumn(name = "step_id")

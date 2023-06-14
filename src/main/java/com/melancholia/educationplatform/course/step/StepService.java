@@ -26,7 +26,7 @@ public class StepService {
         return findStepById(id);
     }
 
-    @PreAuthorize("hasPermission(#step.id, 'Step', 'write')")
+    @PreAuthorize("hasPermission(#id, 'Step', 'write')")
     public void deleteStepById(long id){
         stepRepository.deleteById(id);
     }

@@ -1,12 +1,15 @@
 package com.melancholia.educationplatform.course.step;
 
 
+import com.melancholia.educationplatform.course.module.Module;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity(name = "TestStep")
 @Table(name = "test_step")
@@ -27,12 +30,7 @@ public class TestStep extends Step {
     @OneToMany(mappedBy = "step", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Solution> solutions;
 
-    /*@Column(name = "lectionText", nullable = false)
-    private String image;*/
-
-    public TestStep(String question, boolean multiAnswers) {
-        this.question = question;
-        this.multiAnswers = multiAnswers;
-    }
+    @Column(name = "image")
+    private String image;
 
 }

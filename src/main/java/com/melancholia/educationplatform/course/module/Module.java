@@ -6,7 +6,11 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Entity(name = "Module")
 @Table(name = "module")
@@ -34,4 +38,33 @@ public class Module {
     @ManyToOne
     @JoinColumn(name = "course_id")
     private Course course;
+
+    public Map<String, Long> countSteps(){
+        return steps
+                .stream()
+                .collect(Collectors.groupingBy(
+                        step -> step.getClass().getSimpleName(), Collectors.counting()));
+    }
+
+    public Step getStepById(long stepId){
+        return steps
+                .stream()
+                .filter(step -> step.getId() == stepId)
+                .findAny()
+                .orElse(null);
+    }
+
+    public void sortSteps(){
+        Comparator<Step> compareByNumber = Comparator
+                .comparing(Step::getStepNumber);
+        steps = steps.stream()
+                .sorted(compareByNumber)
+                .collect(Collectors.toList());
+    }
+
+    public Step getNextStep(Step step){
+        int index = steps.indexOf(step);
+        if (index < 0 || index+1 == steps.size()) return null;
+        return steps.get(index+1);
+    }
 }

@@ -5,21 +5,34 @@ import com.melancholia.educationplatform.course.CourseService;
 import com.melancholia.educationplatform.course.module.Module;
 import com.melancholia.educationplatform.course.module.ModuleService;
 import com.melancholia.educationplatform.course.module.ModulesWrapper;
+import com.melancholia.educationplatform.user.User;
 import com.melancholia.educationplatform.user.permissions.PrivilegeService;
+import com.melancholia.educationplatform.util.FileUploadUtil;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Repository;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller("/step")
 @AllArgsConstructor
 public class StepController {
-
+    public static String UPLOAD_PATH = System.getProperty("user.dir") + "/uploads/";
     private final CourseService courseService;
     private final ModuleService moduleService;
     private final StepService stepService;
@@ -27,8 +40,7 @@ public class StepController {
     private final AnswerService answerService;
 
     private final PrivilegeService privilegeService;
-
-
+    private final SolutionService solutionService;
 
     @GetMapping("/step/add")
     public String addModule(@RequestParam(name = "moduleId") long moduleId,
@@ -58,11 +70,19 @@ public class StepController {
     @PostMapping("/step/add-lection")
     public String createLectionStep(@RequestParam(name = "moduleId") long moduleId,
                                     @ModelAttribute InformationTextStep step,
-                                    Authentication authentication) {
+                                    @RequestParam("file") MultipartFile file,
+                                    Authentication authentication) throws IOException {
         Module module = moduleService.findModuleToConstructById(moduleId);
         step.setModule(module);
 
         if (step.getId() == 0) step.setStepNumber(stepService.maxStepNumberModuleId(moduleId) + 1);
+
+        if (!file.isEmpty()) {
+            String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+            step.setVideo(fileName);
+            String uploadDir = "uploads";
+            FileUploadUtil.saveFile(uploadDir, fileName, file);
+        }
 
         stepService.stepSave(step);
         privilegeService.addPermissionToUser(
@@ -75,17 +95,26 @@ public class StepController {
                 Step.class.getSimpleName(),
                 String.valueOf(step.getId()),
                 "write");
+
         return String.format("redirect:/module/%s/steps", step.getModule().getId());
     }
 
     @PostMapping("/step/add-word-answer")
     public String createWordAnswerStep(@RequestParam(name = "moduleId") long moduleId,
                                        @ModelAttribute WordAnswerStep step,
-                                       Authentication authentication) {
+                                       @RequestParam("file") MultipartFile file,
+                                       Authentication authentication) throws IOException {
         Module module = moduleService.findModuleToConstructById(moduleId);
         step.setModule(module);
 
         if (step.getId() == 0) step.setStepNumber(stepService.maxStepNumberModuleId(moduleId) + 1);
+
+        if (!file.isEmpty()) {
+            String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+            step.setImage(fileName);
+            String uploadDir = "uploads";
+            FileUploadUtil.saveFile(uploadDir, fileName, file);
+        }
 
         stepService.stepSave(step);
         privilegeService.addPermissionToUser(
@@ -104,11 +133,19 @@ public class StepController {
     @PostMapping("/step/add-test")
     public String createTestStep(@RequestParam(name = "moduleId") long moduleId,
                                  @ModelAttribute TestStep step,
-                                 Authentication authentication) {
+                                 @RequestParam("file") MultipartFile file,
+                                 Authentication authentication) throws IOException {
         Module module = moduleService.findModuleToConstructById(moduleId);
         step.setModule(module);
 
         if (step.getId() == 0) step.setStepNumber(stepService.maxStepNumberModuleId(moduleId) + 1);
+
+        if (!file.isEmpty()) {
+            String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+            step.setImage(fileName);
+            String uploadDir = "uploads";
+            FileUploadUtil.saveFile(uploadDir, fileName, file);
+        }
 
         stepService.stepSave(step);
         privilegeService.addPermissionToUser(
@@ -158,9 +195,8 @@ public class StepController {
     }
 
     @PostMapping("/step/{id}/delete")
-    public String deleteStep( @RequestParam(name = "moduleId") long moduleId,
-                             @PathVariable("id") long id) {
-
+    public String deleteStep(@PathVariable("id") long id,
+                             @RequestParam(name = "moduleId") long moduleId) {
         stepService.deleteStepById(id);
         return String.format("redirect:/module/%s/steps", moduleId);
     }
@@ -196,9 +232,17 @@ public class StepController {
     @PostMapping("/test-step/answer/add")
     public String createTestStepAnswer(@RequestParam(name = "testStepId") long stepId,
                                        @ModelAttribute Answer answer,
-                                       Authentication authentication) {
+                                       @RequestParam("file") MultipartFile file,
+                                       Authentication authentication) throws IOException {
         Step testStep = stepService.findStepToConstructById(stepId);
         answer.setTestStep(testStep);
+        if (!file.isEmpty()) {
+            String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+            answer.setImage(fileName);
+            String uploadDir = "uploads";
+            FileUploadUtil.saveFile(uploadDir, fileName, file);
+        }
+
         answerService.answerSave(answer);
         privilegeService.addPermissionToUser(
                 authentication,
@@ -239,6 +283,86 @@ public class StepController {
 
         answerService.deleteAnswerById(answerId);
         return String.format("redirect:/test-step/%s/answers", stepId);
+    }
+
+    @PostMapping("/word-answer/{id}/check")
+    public String checkWordAnswer(@PathVariable(name = "id") long id,
+                                  @ModelAttribute WordAnswerStep step,
+                                  @RequestParam(name = "moduleId") long moduleId,
+                                  @RequestParam(name = "courseId") long courseId,
+                                  Authentication authentication) {
+        WordAnswerStep stepFromBd = ((WordAnswerStep) stepService.findStepById(id));
+        Solution solution = new Solution();
+        solution.setSolutionDate(new Date());
+        solution.setStep(stepFromBd);
+        solution.setSolvedCorrect(step.getAnswer().equals(stepFromBd.getAnswer()));
+        solution.setUser((User) authentication.getPrincipal());
+        String solutionText = (step.getAnswer() == null) ? "Ответ не был выбран" : step.getAnswer();
+        solution.setSolutionText(solutionText);
+        solutionService.solutionSave(solution);
+        return String.format("redirect:/course/%s/passing?moduleId=%s&stepId=%s", courseId, moduleId, id);
+    }
+
+    @PostMapping("/test-answer/{id}/check")
+    public String checkTestStepAnswer(@PathVariable(name = "id") long id,
+                                      @ModelAttribute TestStep step,
+                                      @RequestParam(name = "moduleId") long moduleId,
+                                      @RequestParam(name = "courseId") long courseId,
+                                      Authentication authentication) {
+        Answer selectedAnswer = step.getAnswers()
+                .stream()
+                .filter(answer -> answer.getAnswerText() != null)
+                .findAny()
+                .orElse(null);
+        boolean isCorrect = false;
+        Solution solution = new Solution();
+        solution.setSolutionText("Ответ не был выбран");
+        if (selectedAnswer != null) {
+            Answer answerFromBd = answerService.findAnswerById(selectedAnswer.getId());
+            isCorrect = answerFromBd.isCorrect();
+            solution.setSolutionText(selectedAnswer.getAnswerText());
+        }
+
+        TestStep stepFromBd = ((TestStep) stepService.findStepById(id));
+        solution.setSolutionDate(new Date());
+        solution.setStep(stepFromBd);
+        solution.setSolvedCorrect(isCorrect);
+        solution.setUser((User) authentication.getPrincipal());
+        solutionService.solutionSave(solution);
+        return String.format("redirect:/course/%s/passing?moduleId=%s&stepId=%s", courseId, moduleId, id);
+    }
+
+    @PostMapping("/test-answer-multiple/{id}/check")
+    public String checkMultiTestStepAnswer(@PathVariable(name = "id") long id,
+                                           @ModelAttribute TestStep step,
+                                           @RequestParam(name = "moduleId") long moduleId,
+                                           @RequestParam(name = "courseId") long courseId,
+                                           Authentication authentication) {
+        List<Long> selectedAnswers = step.getAnswers()
+                .stream()
+                .filter(answer -> answer.getAnswerText() != null)
+                .map(Answer::getId)
+                .toList();
+        List<Long> correctAnswers = answerService.findCorrectAnswersByStepId(id)
+                .stream()
+                .map(Answer::getId)
+                .toList();
+
+        TestStep stepFromBd = ((TestStep) stepService.findStepById(id));
+        Solution solution = new Solution();
+        solution.setSolutionDate(new Date());
+        solution.setStep(stepFromBd);
+        solution.setSolvedCorrect(new HashSet<>(selectedAnswers).equals(new HashSet<>(correctAnswers)));
+        List<String> answerTexts = step.getAnswers()
+                .stream()
+                .filter(answer -> answer.getAnswerText() != null)
+                .map(Answer::getAnswerText)
+                .toList();
+        if (answerTexts.isEmpty()) answerTexts = List.of("Ответ не был выбран");
+        solution.setSolutionText(String.join(", ",  answerTexts));
+        solution.setUser(((User) authentication.getPrincipal()));
+        solutionService.solutionSave(solution);
+        return String.format("redirect:/course/%s/passing?moduleId=%s&stepId=%s", courseId, moduleId, id);
     }
 
 }

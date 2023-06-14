@@ -51,6 +51,12 @@ public class PrivilegeService {
 
     }
 
+    @Transactional
+    public void deletePermissionUser(long userId, long courseId){
+        userRepository.deletePermission(userId, courseId);
+
+    }
+
     public static String constructPermissionById(String targetType, String targetId, String permission){
         return String.format("%s_%s_%s",
                 targetType.toUpperCase(),

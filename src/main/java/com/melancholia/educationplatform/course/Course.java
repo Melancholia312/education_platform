@@ -8,14 +8,16 @@ import com.melancholia.educationplatform.course.step.Step;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Entity(name = "Course")
-@Table(name = "courses")
+@Table(name = "course")
 @Data
 @NoArgsConstructor
 public class Course {
@@ -40,26 +42,29 @@ public class Course {
     @OneToMany(mappedBy = "course", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Module> modules;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinTable(
             name = "course_users",
             joinColumns = @JoinColumn(name = "course_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private List<User> users;
+    private Set<User> users = new HashSet<>();
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinTable(
             name = "course_authors",
             joinColumns = @JoinColumn(name = "course_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private List<User> authors = new ArrayList<>();
+    private Set<User> authors = new HashSet<>();
 
-    @Column(name = "description")
+    @Column(name = "short_description", length = 150)
+    private String shortDescription;
+
+    @Column(name = "description", length = 5000)
     private String description;
 
-    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Review> reviews;
 
     @Column(name = "creation_date")
@@ -71,5 +76,38 @@ public class Course {
 
     public void addAuthor(User user){
         authors.add(user);
+    }
+
+    public int countStudents(){
+        return users.size();
+    }
+
+    public double avgRating(){
+        return (double) Math.round(reviews.stream()
+                .mapToDouble(Review::getStars)
+                .average()
+                .orElse(0) * 100) /  100;
+    }
+
+    public Module getModuleById(long moduleId){
+        return modules
+                .stream()
+                .filter(module -> module.getId() == moduleId)
+                .findAny()
+                .orElse(null);
+    }
+
+    public void sortModules(){
+        Comparator<Module> compareByNumber = Comparator
+                .comparing(Module::getModuleNumber);
+        modules = modules.stream()
+                .sorted(compareByNumber)
+                .collect(Collectors.toList());
+    }
+
+    public Module getNextModule(Module module){
+        int index = modules.indexOf(module);
+        if (index < 0 || index+1 == modules.size()) return null;
+        return modules.get(index+1);
     }
 }

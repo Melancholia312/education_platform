@@ -6,6 +6,7 @@ import com.melancholia.educationplatform.user.permissions.Privilege;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -17,6 +18,7 @@ import java.util.*;
 @Table(name = "user")
 @Data
 @NoArgsConstructor
+@EqualsAndHashCode
 public class User implements UserDetails {
 
     @Id
@@ -40,15 +42,6 @@ public class User implements UserDetails {
     @Pattern(regexp = "^(\\+7|8)\\d{10}$",message = "Формат +7XXXXXXXXXX либо 8XXXXXXXXXX")
     @Column(name = "phone", unique = true)
     private String phone;
-
-    @ManyToMany(mappedBy = "users", fetch = FetchType.LAZY)
-    private List<Course> courses;
-
-    @ManyToMany(mappedBy = "authors", fetch = FetchType.LAZY)
-    private List<Course> authorOfCourses;
-
-    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
-    private List<Review> reviews;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "users_privileges",

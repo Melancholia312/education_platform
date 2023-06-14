@@ -36,7 +36,7 @@ public class ModuleController {
                                Authentication authentication){
         Course course = courseService.findCourseToConstructById(courseId);
         module.setCourse(course);
-        if (module.getId() == 0) module.setModuleNumber(moduleService.maxModuleNumberCourseId(courseId)+1);
+        module.setModuleNumber(moduleService.maxModuleNumberCourseId(courseId)+1);
 
         moduleService.moduleSave(module);
         privilegeService.addPermissionToUser(
@@ -49,6 +49,13 @@ public class ModuleController {
                 Module.class.getSimpleName(),
                 String.valueOf(module.getId()),
                 "write");
+        return String.format("redirect:/course/%s/constructor", courseId);
+    }
+
+    @PostMapping("/module/edit")
+    public String editModule(@RequestParam(name = "courseId") long courseId,
+                             @ModelAttribute Module module){
+        moduleService.moduleSave(module);
         return String.format("redirect:/course/%s/constructor", courseId);
     }
 

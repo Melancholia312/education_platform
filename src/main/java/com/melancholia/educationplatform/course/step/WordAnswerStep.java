@@ -5,7 +5,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity(name = "WordAnswerStep")
 @Table(name = "word_answer_step")
@@ -20,9 +22,10 @@ public class WordAnswerStep extends Step {
     @Column(name = "answer", nullable = false)
     private String answer;
 
-    @OneToMany(mappedBy = "step", fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @OneToMany(mappedBy = "step", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Solution> solutions;
 
-    /*@Column(name = "lectionText", nullable = false)
-    private String image;*/
+    @Column(name = "image")
+    private String image;
+
 }

@@ -9,14 +9,47 @@
           crossorigin="anonymous" />
 </head>
 <body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light mb-5">
+    <a class="navbar-brand" href="/">Степик</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
 
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="/">Каталог</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Мое обучение</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/my-courses}">Мои курсы</a>
+            </li>
+
+        </ul>
+
+        <ul class="nav navbar-nav pull-right">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
+                    Username
+                </a>
+                <div class="dropdown-menu dropdown-menu-right">
+                    <a class="dropdown-item" href="#">Настройки</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="/logout">Выйти</a>
+                </div>
+            </li>
+        </ul>
+    </div>
+</nav>
 <div class="container">
-    <h2 th:object="${course}" th:text="${'Adding module to course ' + course.name}"></h2>
+    <h2 th:object="${course}" th:text="${'Добавление модуля внутри курса - ' + course.name}"></h2>
 
     <form th:action="@{/module/add (courseId=${course.id}) }" th:object="${module}" method="POST">
-        <h3>Новый модуль</h3>
-        <hr/>
-        <input type="text" th:field="*{name}" class="form-control col-4 mb-4" placeholder="Name" />
+        <label>Название модуля</label>
+        <input type="text" th:field="*{name}" class="form-control col-4 mb-4" placeholder="Название" />
         <button type="submit" class="btn btn-primary col-2">Сохранить</button>
 
     </form>
