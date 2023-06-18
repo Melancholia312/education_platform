@@ -14,31 +14,13 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 @AllArgsConstructor
 public class SecurityConfig {
-    /*private final AppOAuth2UserService appOAuth2UserService;
+
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.
-                formLogin()
-                .and()
-                .oauth2Login()
-                .userInfoEndpoint()
-                .userService(appOAuth2UserService)
-                .and()
-                .successHandler((request, response, authentication) -> {
-                    DefaultOidcUser oauthUser = (DefaultOidcUser) authentication.getPrincipal();
-                    appOAuth2UserService.processOAuthPostLogin(
-                            oauthUser.getEmail(),
-                            oauthUser.getFullName(),
-                            oauthUser.getPhoneNumber());
-                    response.sendRedirect("/my-courses");
-                });
-        return http.build();
-    }*/
-
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.formLogin();
+        http
+                .formLogin()
+                .loginPage("/login").and().logout();
         return http.build();
     }
 

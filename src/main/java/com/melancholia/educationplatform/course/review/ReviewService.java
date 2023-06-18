@@ -14,4 +14,8 @@ public class ReviewService {
         reviewRepository.save(review);
     }
 
+    public void deleteByAuthorAndCourseId(String author, long course_id){
+        reviewRepository.deleteByAuthorAndCourseId(author, course_id);
+    }
+
 }

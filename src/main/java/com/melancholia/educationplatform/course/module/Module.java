@@ -3,7 +3,11 @@ package com.melancholia.educationplatform.course.module;
 import com.melancholia.educationplatform.course.Course;
 import com.melancholia.educationplatform.course.step.Step;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.Comparator;
@@ -16,6 +20,7 @@ import java.util.stream.Collectors;
 @Table(name = "module")
 @Data
 @NoArgsConstructor
+@EqualsAndHashCode
 public class Module {
 
     @Id
@@ -29,7 +34,9 @@ public class Module {
     @Column(name = "module_number")
     private long moduleNumber;
 
-    @Column(name = "module_name")
+    @NotEmpty(message = "Название не может быть пустым")
+    @Size(min = 3, max = 75,  message = "Название должно быть длинной от 3 до 75 символов")
+    @Column(name = "module_name", length = 75)
     private String name;
 
     @OneToMany(mappedBy = "module", fetch = FetchType.LAZY, cascade = CascadeType.ALL)

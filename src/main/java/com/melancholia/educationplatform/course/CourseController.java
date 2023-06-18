@@ -1,6 +1,8 @@
 package com.melancholia.educationplatform.course;
 
 
+import com.melancholia.educationplatform.core.exception.ModuleNotFoundException;
+import com.melancholia.educationplatform.core.exception.StepNotFoundException;
 import com.melancholia.educationplatform.course.module.Module;
 import com.melancholia.educationplatform.course.module.ModuleService;
 import com.melancholia.educationplatform.course.module.ModulesWrapper;
@@ -8,13 +10,19 @@ import com.melancholia.educationplatform.course.review.Review;
 import com.melancholia.educationplatform.course.step.*;
 import com.melancholia.educationplatform.course.step.comment.Comment;
 import com.melancholia.educationplatform.user.User;
+import com.melancholia.educationplatform.user.UserRepository;
 import com.melancholia.educationplatform.user.permissions.PrivilegeService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Comparator;
@@ -34,6 +42,9 @@ public class CourseController {
     private final CourseRepository courseRepository;
 
     private final SolutionService solutionService;
+    private final ChecklistService checklistService;
+
+    private final UserRepository userRepository;
 
     @GetMapping("/")
     public String mainPageWithCourses() {
@@ -49,22 +60,27 @@ public class CourseController {
 
     @GetMapping("/course/{id}/edit")
     public String editCourseForm(@PathVariable("id") long id, Model model) {
-        model.addAttribute("course", courseService.findCourseToConstructById(id));
+        Course course = courseService.findCourseToConstructById(id);
+        if (course.isPublished()){
+            return "redirect:/";
+        }
+        model.addAttribute("course", course);
         return "course/edit";
     }
 
     @PostMapping("/course/add")
     @PreAuthorize("isAuthenticated()")
-    public String createCourse(@ModelAttribute Course course, Authentication authentication) {
+    public String createCourse(@Valid Course course, BindingResult bindingResult,
+                               Model model,
+                               Authentication authentication) {
+        if (bindingResult.hasErrors()){
+            model.addAttribute("course", course);
+            return "course/add";
+        }
         course.setCreationDate(new Date());
         course.addAuthor(((User) authentication.getPrincipal()));
         courseService.courseSave(course);
 
-        privilegeService.addPermissionToUser(
-                authentication,
-                Course.class.getSimpleName(),
-                String.valueOf(course.getId()),
-                "read");
         privilegeService.addPermissionToUser(
                 authentication,
                 Course.class.getSimpleName(),
@@ -76,7 +92,15 @@ public class CourseController {
 
     @PostMapping("/course/edit")
     @PreAuthorize("isAuthenticated()")
-    public String editCourse(@ModelAttribute Course course) {
+    public String editCourse(@Valid Course course, BindingResult bindingResult,
+                             Model model) {
+        if (course.isPublished()){
+            return "redirect:/";
+        }
+        if (bindingResult.hasErrors()){
+            model.addAttribute("course", course);
+            return "course/edit";
+        }
         course.setCreationDate(new Date());
         courseService.courseSave(course);
         return "redirect:/my-courses";
@@ -84,13 +108,23 @@ public class CourseController {
 
     @GetMapping("/course/{id}/delete")
     public String deleteCourseForm(@PathVariable("id") long id, Model model) {
-        model.addAttribute("course", courseService.findCourseToConstructById(id));
+        Course course = courseService.findCourseToConstructById(id);
+        if (course.isPublished()){
+            return "redirect:/";
+        }
+        model.addAttribute("course", course);
         return "course/delete";
     }
 
     @PostMapping("/course/{id}/delete")
-    public String deleteCourse(@PathVariable("id") long id) {
+    public String deleteCourse(@PathVariable("id") long id,
+                               Authentication authentication) {
+        Course course = courseService.findCourseToConstructById(id);
+        if (course.isPublished()){
+            return "redirect:/";
+        }
         courseService.deleteCourseById(id);
+        courseService.deleteCoursePermission(((User) authentication.getPrincipal()).getId(), id);
         return "redirect:/my-courses";
     }
 
@@ -106,7 +140,11 @@ public class CourseController {
     public String getConstructorCourseById(@PathVariable("id") long id,
                                            Authentication authentication,
                                            Model model) {
-        model.addAttribute("course", courseService.findCourseToConstructById(id));
+        Course course = courseService.findCourseToConstructById(id);
+        if (course.isPublished()){
+            return "redirect:/";
+        }
+        model.addAttribute("course", course);
         ModulesWrapper modulesWrapper = new ModulesWrapper(moduleService.getCourseModules(id));
         model.addAttribute("modules", modulesWrapper);
         return "course/course-constructor";
@@ -114,8 +152,25 @@ public class CourseController {
 
     @PostMapping("/course/{id}/publish")
     public String publishCourse(@PathVariable("id") long id) {
-        courseService.publishCourse(id, true);
-        return "redirect:/my-courses";
+        if (checklistService.check(id).isFinalCheck()){
+            courseService.publishCourse(id, true);
+            return "redirect:/my-courses";
+        } else {
+            return String.format("redirect:/course/%s/checklist", id);
+        }
+
+    }
+
+    @GetMapping("/course/{id}/checklist")
+    public String checklist(@PathVariable("id") long id,
+                            Model model){
+        Course course = courseService.findCourseToConstructById(id);
+        if (course.isPublished()){
+            return "redirect:/";
+        }
+        CheckList checkList = checklistService.check(id);
+        model.addAttribute("checklist", checkList);
+        return "course/checklist";
     }
 
     @PostMapping("/course/{id}/close")
@@ -148,14 +203,6 @@ public class CourseController {
 
     }
 
-    @GetMapping("/course/{id}")
-    public String getCourseById(@PathVariable("id") long id,
-                                Authentication authentication,
-                                Model model) {
-        model.addAttribute("course", courseService.findCourseToLearnById(id));
-        return "course/course";
-    }
-
     @PostMapping("/course/{id}/enroll")
     @PreAuthorize("isAuthenticated()")
     public String enrollToCourseById(@PathVariable("id") long id,
@@ -174,7 +221,7 @@ public class CourseController {
                                 @RequestParam(value = "sortField", required = false, defaultValue = "date") String sortField,
                                 @RequestParam(value = "sortDir", required = false, defaultValue = "asc") String sortDir,
                                 Model model) {
-        int pageSize = 2;
+        int pageSize = 6;
 
         Page<Course> page = courseService.findPaginated(pageNo, pageSize, sortField, sortDir);
         model.addAttribute("currentPage", pageNo);
@@ -193,7 +240,7 @@ public class CourseController {
     public String search(@PathVariable(value = "pageNo") int pageNo,
                          @RequestParam(value = "keyword") String keyword,
                          Model model) {
-        int pageSize = 2;
+        int pageSize = 6;
 
         Page<Course> page = courseService.search(pageNo, pageSize, keyword);
         model.addAttribute("currentPage", pageNo);
@@ -214,6 +261,7 @@ public class CourseController {
         Course course = courseService.findCourseToLearnById(id);
         course.sortModules();
         Module module = course.getModuleById(Long.parseLong(moduleId));
+        if (module == null) throw new ModuleNotFoundException("Module not found");
         List<Solution> solutions = solutionService.getUserSolutions(
                 ((User) authentication.getPrincipal()).getId(),
                 Long.parseLong(stepId));
@@ -227,6 +275,7 @@ public class CourseController {
             sortModule.sortSteps();
         }
         Step step = module.getStepById(Long.parseLong(stepId));
+        if (step == null) throw new StepNotFoundException("Step not found");
         Step nextStep = module.getNextStep(step);
         Module nextModule = module;
         if (nextStep == null) {
@@ -244,6 +293,8 @@ public class CourseController {
         model.addAttribute("newComment", new Comment());
         model.addAttribute("isPassed", isPassed);
         model.addAttribute("userSolutions", solutions.stream().sorted(compareByDate).collect(Collectors.toList()));
+        model.addAttribute("userProgress",
+                courseService.checkUserProgress(((User) authentication.getPrincipal()).getId(), List.of(course.getId())));
         return "course/passing";
     }
 
@@ -259,11 +310,4 @@ public class CourseController {
         return "course/my-learning";
     }
 
-    @GetMapping("/course/{id}/unsubscribe")
-    @PreAuthorize("isAuthenticated()")
-    public String unsubscribe(@PathVariable(value = "id") int courseId,
-                              Authentication authentication) {
-        courseService.unsubscribe(((User) authentication.getPrincipal()).getId(), courseId);
-        return "course/my-learning";
-    }
 }

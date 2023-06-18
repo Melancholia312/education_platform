@@ -6,10 +6,12 @@ import com.melancholia.educationplatform.course.step.InformationTextStep;
 import com.melancholia.educationplatform.course.step.Solution;
 import com.melancholia.educationplatform.course.step.SolutionService;
 import com.melancholia.educationplatform.course.step.Step;
+import com.melancholia.educationplatform.user.User;
 import com.melancholia.educationplatform.user.UserRepository;
 import com.melancholia.educationplatform.user.permissions.Privilege;
 import com.melancholia.educationplatform.user.permissions.PrivilegeRepository;
 import com.melancholia.educationplatform.user.permissions.PrivilegeService;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +20,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -135,9 +141,34 @@ public class CourseService {
         return userCourseMap;
     }
 
-    public void unsubscribe(long userId, long courseId){
+    @Transactional
+    public void unsubscribe(User user, long courseId){
         Privilege privilege = privilegeRepository.findByName(String.format("COURSE_%s_READ",courseId));
-        privilegeService.deletePermissionUser(userId, privilege.getId());
-        userRepository.unsubscribe(userId, courseId);
+        privilegeService.deletePermissionUser(user.getId(), privilege.getId());
+        userRepository.unsubscribe(user.getId(), courseId);
+    }
+
+    @Transactional
+    public void deleteCoursePermission(long userId, long courseId){
+        Privilege privilegeWrite = privilegeRepository.findByName(String.format("COURSE_%s_WRITE", courseId));
+        privilegeService.deletePermissionUser(userId, privilegeWrite.getId());
+    }
+
+    @Transactional
+    public void deleteModulePermissions(long userId, long moduleIde){
+        Privilege privilegeWrite = privilegeRepository.findByName(String.format("MODULE_%s_WRITE", moduleIde));
+        privilegeService.deletePermissionUser(userId, privilegeWrite.getId());
+    }
+
+    @Transactional
+    public void deleteStepPermissions(long userId, long stepId){
+        Privilege privilegeWrite = privilegeRepository.findByName(String.format("STEP_%s_WRITE", stepId));
+        privilegeService.deletePermissionUser(userId, privilegeWrite.getId());
+    }
+
+    @Transactional
+    public void deleteAnswerPermissions(long userId, long answerId){
+        Privilege privilegeWrite = privilegeRepository.findByName(String.format("ANSWER_%s_WRITE", answerId));
+        privilegeService.deletePermissionUser(userId, privilegeWrite.getId());
     }
 }

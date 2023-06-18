@@ -1,9 +1,14 @@
 package com.melancholia.educationplatform.registration;
 
 import com.melancholia.educationplatform.user.User;
+import com.melancholia.educationplatform.user.UserRepository;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Controller
 @RequestMapping(path = "registration")
@@ -11,20 +16,38 @@ import org.springframework.web.bind.annotation.*;
 public class RegistrationController {
 
     private final RegistrationService registrationService;
+    private final UserRepository userRepository;
 
     @GetMapping
-    public String register() {
-        return register(new User("username", "melancholia200312@gmail.com", "123", "+79603566081"));
+    public String register(Model model) {
+        model.addAttribute("user", new User());
+        return "registration";
     }
 
     @PostMapping
-    public String register(User user) {
-        return registrationService.register(user);
-    }
+    public String register(@Valid User user, BindingResult bindingResult, Model model,
+                           @RequestParam("passwordRepeat") String passwordRepeat) {
+        String passwordsDif = null;
+        String emailExists = null;
+        String usernameExists = null;
+        if (!user.getPassword().equals(passwordRepeat)){
+            passwordsDif = "Пароли не совпадают";
+        }
+        if (userRepository.findByEmail(user.getEmail()) != null){
+            emailExists = String.format("Email %s уже занят", user.getEmail());
+        }
+        if (userRepository.findByUsername(user.getUsername()) != null){
+            usernameExists = String.format("Имя %s уже занято", user.getUsername());
+        }
+        if (bindingResult.hasErrors() || passwordsDif != null || emailExists != null || usernameExists != null){
+            model.addAttribute("passwordsError", passwordsDif);
+            model.addAttribute("emailExists", emailExists);
+            model.addAttribute("usernameExists", usernameExists);
+            model.addAttribute("user", user);
+            return "registration";
+        }
 
-    @GetMapping(path = "confirm")
-    public String confirm(@RequestParam("token") String token) {
-        return registrationService.confirmToken(token);
+        return registrationService.register(user);
     }
 
 }

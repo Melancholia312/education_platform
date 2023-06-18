@@ -6,6 +6,8 @@ import com.melancholia.educationplatform.user.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -25,7 +27,9 @@ public class Comment {
     )
     private Long id;
 
-    @Column(name = "reviewText", nullable = false)
+    @NotEmpty
+    @Size(max = 100)
+    @Column(name = "reviewText", nullable = false, length = 100)
     private String reviewText;
 
     @Column(name = "author", nullable = false)

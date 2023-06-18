@@ -59,7 +59,7 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     @Transactional
     void enrollUser(@Param("userId") long userId, @Param("courseId") long courseId);
 
-    @Query(value ="select (count(*) > 0) from course_users where course_id = ?1 and user_id = ?2", nativeQuery = true)
+    @Query(value = "select (count(*) > 0) from course_users where course_id = ?1 and user_id = ?2", nativeQuery = true)
     boolean isMember(long courseId, long userId);
 
     @Query(value = "SELECT * FROM Course WHERE (name LIKE %?1%"
@@ -68,12 +68,12 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
             + " AND is_published=true", nativeQuery = true)
     Page<Course> search(Pageable pageable, String keyword);
 
-    /*@Query(value = "SELECT user_id, phone, password, email, username\n" +
-            "FROM public.user\n" +
-            "WHERE user_id=?1", nativeQuery = true)
-    List<User> findAuthorsByCourse(long course_id);*/
-/*
-
-    @Query("select course_id, comments_allowed, creation_date, description, is_published, id, price from courses")
-    List<Course> findCoursesWithUsersPermission();*/
+    @Modifying
+    @Transactional
+    @Query(value = """
+            UPDATE course
+            SET is_published = false
+            FROM course_authors
+            WHERE user_id = ?1""", nativeQuery = true)
+    int unpublishAllUserCourses(long user_id);
 }

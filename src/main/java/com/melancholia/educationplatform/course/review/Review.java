@@ -5,9 +5,11 @@ import com.melancholia.educationplatform.user.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Range;
 
 @Entity(name = "Review")
 @Table(name = "review")
@@ -24,7 +26,8 @@ public class Review {
     )
     private Long id;
 
-    @Column(name = "reviewText", nullable = false)
+    @Size(max = 100,  message = "Текст отзыва не должнен превышать 100 символов")
+    @Column(name = "reviewText", nullable = false, length = 100)
     private String reviewText;
 
     @Column(name = "author", nullable = false)
@@ -35,8 +38,7 @@ public class Review {
     private Course course;
 
     @Column(name = "stars")
-    @Min(value=1)
-    @Max(value=5)
+    @Range(min = 1, max = 5, message = "Выберите количество звезд")
     private int stars;
 
 }

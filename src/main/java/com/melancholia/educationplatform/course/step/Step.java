@@ -5,6 +5,7 @@ import com.melancholia.educationplatform.course.module.Module;
 import com.melancholia.educationplatform.course.step.comment.Comment;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
@@ -34,4 +35,8 @@ public class Step {
     @OneToMany(mappedBy = "step", fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     private List<Comment> comments;
 
+    public boolean equals(Object o) {
+        if(!(o instanceof Step other)) return false;
+        return (this.id == other.id);
+    }
 }

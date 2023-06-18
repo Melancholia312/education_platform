@@ -29,8 +29,6 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
             return false;
         }
 
-        //TODO check course of user
-
         String permissionStringWithId = PrivilegeService.constructPermissionById(
                 targetType,
                 targetId.toString(),

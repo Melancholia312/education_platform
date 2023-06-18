@@ -8,6 +8,7 @@ import com.melancholia.educationplatform.course.module.ModulesWrapper;
 import com.melancholia.educationplatform.user.User;
 import com.melancholia.educationplatform.user.permissions.PrivilegeService;
 import com.melancholia.educationplatform.util.FileUploadUtil;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -46,7 +47,11 @@ public class StepController {
     public String addModule(@RequestParam(name = "moduleId") long moduleId,
                             @RequestParam(name = "type") String type,
                             Model model) {
-        model.addAttribute("module", moduleService.findModuleToConstructById(moduleId));
+        Module module = moduleService.findModuleToConstructById(moduleId);
+        if (module.getCourse().isPublished()){
+            return "redirect:/";
+        }
+        model.addAttribute("module", module);
         Step step;
         switch (type) {
             case "word-answer-step" -> {
@@ -69,10 +74,21 @@ public class StepController {
 
     @PostMapping("/step/add-lection")
     public String createLectionStep(@RequestParam(name = "moduleId") long moduleId,
-                                    @ModelAttribute InformationTextStep step,
+                                    @Valid @ModelAttribute("step") InformationTextStep step, BindingResult bindingResult, Model model,
                                     @RequestParam("file") MultipartFile file,
                                     Authentication authentication) throws IOException {
         Module module = moduleService.findModuleToConstructById(moduleId);
+        if (module.getCourse().isPublished()){
+            return "redirect:/";
+        }
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("step", step);
+            if (step.getId() == 0){
+                model.addAttribute("module", module);
+                return "step/add-lection-step";
+            }
+            return "step/edit-lection-step";
+        }
         step.setModule(module);
 
         if (step.getId() == 0) step.setStepNumber(stepService.maxStepNumberModuleId(moduleId) + 1);
@@ -89,11 +105,6 @@ public class StepController {
                 authentication,
                 Step.class.getSimpleName(),
                 String.valueOf(step.getId()),
-                "read");
-        privilegeService.addPermissionToUser(
-                authentication,
-                Step.class.getSimpleName(),
-                String.valueOf(step.getId()),
                 "write");
 
         return String.format("redirect:/module/%s/steps", step.getModule().getId());
@@ -101,10 +112,21 @@ public class StepController {
 
     @PostMapping("/step/add-word-answer")
     public String createWordAnswerStep(@RequestParam(name = "moduleId") long moduleId,
-                                       @ModelAttribute WordAnswerStep step,
+                                       @Valid @ModelAttribute("step") WordAnswerStep step, BindingResult bindingResult, Model model,
                                        @RequestParam("file") MultipartFile file,
                                        Authentication authentication) throws IOException {
         Module module = moduleService.findModuleToConstructById(moduleId);
+        if (module.getCourse().isPublished()){
+            return "redirect:/";
+        }
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("step", step);
+            if (step.getId() == 0) {
+                model.addAttribute("module", module);
+                return "step/add-word-answer-step";
+            }
+            return "step/edit-word-answer-step";
+        }
         step.setModule(module);
 
         if (step.getId() == 0) step.setStepNumber(stepService.maxStepNumberModuleId(moduleId) + 1);
@@ -117,11 +139,6 @@ public class StepController {
         }
 
         stepService.stepSave(step);
-        privilegeService.addPermissionToUser(
-                authentication,
-                Step.class.getSimpleName(),
-                String.valueOf(step.getId()),
-                "read");
         privilegeService.addPermissionToUser(
                 authentication,
                 Step.class.getSimpleName(),
@@ -132,10 +149,21 @@ public class StepController {
 
     @PostMapping("/step/add-test")
     public String createTestStep(@RequestParam(name = "moduleId") long moduleId,
-                                 @ModelAttribute TestStep step,
+                                 @Valid @ModelAttribute("step") TestStep step, BindingResult bindingResult, Model model,
                                  @RequestParam("file") MultipartFile file,
                                  Authentication authentication) throws IOException {
         Module module = moduleService.findModuleToConstructById(moduleId);
+        if (module.getCourse().isPublished()){
+            return "redirect:/";
+        }
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("step", step);
+            if (step.getId() == 0) {
+                model.addAttribute("module", module);
+                return "step/add-test-step";
+            }
+            return "step/edit-test-step";
+        }
         step.setModule(module);
 
         if (step.getId() == 0) step.setStepNumber(stepService.maxStepNumberModuleId(moduleId) + 1);
@@ -148,11 +176,6 @@ public class StepController {
         }
 
         stepService.stepSave(step);
-        privilegeService.addPermissionToUser(
-                authentication,
-                Step.class.getSimpleName(),
-                String.valueOf(step.getId()),
-                "read");
         privilegeService.addPermissionToUser(
                 authentication,
                 Step.class.getSimpleName(),
@@ -164,7 +187,11 @@ public class StepController {
     @GetMapping("/module/{id}/steps")
     public String viewMySteps(@PathVariable("id") long id,
                               Model model) {
-        model.addAttribute("module", moduleService.findModuleToConstructById(id));
+        Module module =  moduleService.findModuleToConstructById(id);
+        if (module.getCourse().isPublished()){
+            return "redirect:/";
+        }
+        model.addAttribute("module", module);
         StepsWrapper stepsWrapper = new StepsWrapper(stepService.findStepsByModuleId(id));
         model.addAttribute("steps", stepsWrapper);
         return "step/all-steps";
@@ -173,7 +200,11 @@ public class StepController {
     @GetMapping("/step/{id}/edit")
     public String editStep(@PathVariable("id") long id, Model model,
                            @RequestParam(name = "type") String type) {
-        model.addAttribute("step", stepService.findStepToConstructById(id));
+        Step step = stepService.findStepToConstructById(id);
+        if (step.getModule().getCourse().isPublished()){
+            return "redirect:/";
+        }
+        model.addAttribute("step", step);
         switch (type) {
             case "WordAnswerStep" -> {
                 return "step/edit-word-answer-step";
@@ -190,20 +221,34 @@ public class StepController {
 
     @GetMapping("/step/{id}/delete")
     public String deleteStepForm(@PathVariable("id") long id, Model model) {
-        model.addAttribute("step", stepService.findStepToConstructById(id));
+        Step step = stepService.findStepToConstructById(id);
+        if (step.getModule().getCourse().isPublished()){
+            return "redirect:/";
+        }
+        model.addAttribute("step", step);
         return "step/delete";
     }
 
     @PostMapping("/step/{id}/delete")
     public String deleteStep(@PathVariable("id") long id,
-                             @RequestParam(name = "moduleId") long moduleId) {
+                             @RequestParam(name = "moduleId") long moduleId,
+                             Authentication authentication) {
+        Module module = moduleService.findModuleToConstructById(moduleId);
+        if (module.getCourse().isPublished()){
+            return "redirect:/";
+        }
         stepService.deleteStepById(id);
+        courseService.deleteStepPermissions(((User) authentication.getPrincipal()).getId(), id);
         return String.format("redirect:/module/%s/steps", moduleId);
     }
 
     @PostMapping("/steps/switch")
     public String switchSteps(@RequestParam(name = "moduleId") long moduleId,
                               @ModelAttribute StepsWrapper steps) {
+        Module module = moduleService.findModuleToConstructById(moduleId);
+        if (module.getCourse().isPublished()){
+            return "redirect:/";
+        }
         for (Step step : steps.getSteps()) {
             stepService.updateStepNumber(step.getId(), step.getStepNumber());
         }
@@ -213,8 +258,11 @@ public class StepController {
     @GetMapping("/test-step/{id}/answers")
     public String getTestStepAnswers(@PathVariable("id") long id,
                                      Model model) {
-
-        model.addAttribute("step", stepService.findStepToConstructById(id));
+        Step step = stepService.findStepToConstructById(id);
+        if (step.getModule().getCourse().isPublished()){
+            return "redirect:/";
+        }
+        model.addAttribute("step", step);
         model.addAttribute("answers", answerService.findAnswerByTestStepId(id));
         return "step/all-answers";
     }
@@ -222,8 +270,11 @@ public class StepController {
     @GetMapping("/test-step/answer/add")
     public String addTestStepAnswer(@RequestParam(name = "testStepId") long testStepId,
                                     Model model) {
-
-        model.addAttribute("step", stepService.findStepToConstructById(testStepId));
+        Step step = stepService.findStepToConstructById(testStepId);
+        if (step.getModule().getCourse().isPublished()){
+            return "redirect:/";
+        }
+        model.addAttribute("step", step);
         model.addAttribute("answer", new Answer());
         return "step/add-answer";
     }
@@ -231,10 +282,19 @@ public class StepController {
 
     @PostMapping("/test-step/answer/add")
     public String createTestStepAnswer(@RequestParam(name = "testStepId") long stepId,
-                                       @ModelAttribute Answer answer,
+                                       @Valid Answer answer, BindingResult bindingResult, Model  model,
                                        @RequestParam("file") MultipartFile file,
                                        Authentication authentication) throws IOException {
         Step testStep = stepService.findStepToConstructById(stepId);
+        if (testStep.getModule().getCourse().isPublished()){
+            return "redirect:/";
+        }
+        if (bindingResult.hasErrors()){
+            model.addAttribute("step", testStep);
+            model.addAttribute("answer", answer);
+            if (answer.getId() == 0) return "step/add-answer";
+            return "step/edit-answer";
+        }
         answer.setTestStep(testStep);
         if (!file.isEmpty()) {
             String fileName = StringUtils.cleanPath(file.getOriginalFilename());
@@ -248,11 +308,6 @@ public class StepController {
                 authentication,
                 Answer.class.getSimpleName(),
                 String.valueOf(answer.getId()),
-                "read");
-        privilegeService.addPermissionToUser(
-                authentication,
-                Answer.class.getSimpleName(),
-                String.valueOf(answer.getId()),
                 "write");
         return String.format("redirect:/test-step/%s/answers", stepId);
     }
@@ -261,8 +316,11 @@ public class StepController {
     public String editModule(@RequestParam(name = "answerId") long answerId,
                              @RequestParam(name = "stepId") long stepId,
                              Model model) {
-
-        model.addAttribute("step", stepService.findStepToConstructById(stepId));
+        Step step = stepService.findStepToConstructById(stepId);
+        if (step.getModule().getCourse().isPublished()){
+            return "redirect:/";
+        }
+        model.addAttribute("step", step);
         model.addAttribute("answer", answerService.findAnswerToConstructById(answerId));
         return "step/edit-answer";
     }
@@ -271,17 +329,25 @@ public class StepController {
     public String deleteAnswerForm(@RequestParam(name = "answerId") long answerId,
                                    @RequestParam(name = "stepId") long stepId,
                                    Model model) {
-
-        model.addAttribute("step", stepService.findStepToConstructById(stepId));
+        Step step = stepService.findStepToConstructById(stepId);
+        if (step.getModule().getCourse().isPublished()){
+            return "redirect:/";
+        }
+        model.addAttribute("step", step);
         model.addAttribute("answer", answerService.findAnswerToConstructById(answerId));
         return "step/delete-answer";
     }
 
     @PostMapping("test-step/answer/delete")
     public String deleteAnswer(@RequestParam(name = "answerId") long answerId,
-                               @RequestParam(name = "stepId") long stepId) {
-
+                               @RequestParam(name = "stepId") long stepId,
+                               Authentication authentication) {
+        Step step = stepService.findStepToConstructById(stepId);
+        if (step.getModule().getCourse().isPublished()){
+            return "redirect:/";
+        }
         answerService.deleteAnswerById(answerId);
+        courseService.deleteAnswerPermissions(((User) authentication.getPrincipal()).getId(), answerId);
         return String.format("redirect:/test-step/%s/answers", stepId);
     }
 
@@ -297,7 +363,7 @@ public class StepController {
         solution.setStep(stepFromBd);
         solution.setSolvedCorrect(step.getAnswer().equals(stepFromBd.getAnswer()));
         solution.setUser((User) authentication.getPrincipal());
-        String solutionText = (step.getAnswer() == null) ? "Ответ не был выбран" : step.getAnswer();
+        String solutionText = (step.getAnswer() == null || step.getAnswer().isEmpty()) ? "Ответ не был выбран" : step.getAnswer();
         solution.setSolutionText(solutionText);
         solutionService.solutionSave(solution);
         return String.format("redirect:/course/%s/passing?moduleId=%s&stepId=%s", courseId, moduleId, id);
@@ -359,7 +425,7 @@ public class StepController {
                 .map(Answer::getAnswerText)
                 .toList();
         if (answerTexts.isEmpty()) answerTexts = List.of("Ответ не был выбран");
-        solution.setSolutionText(String.join(", ",  answerTexts));
+        solution.setSolutionText(String.join(", ", answerTexts));
         solution.setUser(((User) authentication.getPrincipal()));
         solutionService.solutionSave(solution);
         return String.format("redirect:/course/%s/passing?moduleId=%s&stepId=%s", courseId, moduleId, id);

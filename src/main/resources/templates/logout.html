@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <html xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <html lang="en">
@@ -59,24 +60,28 @@
         </ul>
     </div>
 </nav>
-<div class="container">
-    <h2 th:object="${course}" th:text="'Редактирование модуля'"></h2>
-    <hr>
-    <form th:action="@{/module/edit (courseId=${module.course.id}) }" th:object="${module}" method="POST">
-        <div th:if="${#fields.hasAnyErrors()}">
-            <div class="alert alert-danger" th:each="err : ${#fields.allErrors()}" th:text="${err}" role="alert"></div>
+<div class="mask d-flex align-items-center h-100 gradient-custom-3">
+    <div class="container h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col-12 col-md-9 col-lg-7 col-xl-6">
+                <div class="card" style="border-radius: 15px;">
+                    <div class="card-body p-5">
+                        <h2 class="text-center mb-5">Вы действительно хотите выйти из аккаунта?</h2>
+
+                        <form th:action="@{/logout}" method="POST">
+
+                            <div class="d-flex justify-content-center">
+                                <button type="submit"
+                                        class="btn btn-primary btn-block btn-lg text-body">Выйти</button>
+                            </div>
+
+                        </form>
+
+                    </div>
+                </div>
+            </div>
         </div>
-        <input type="hidden" th:field="*{id}" />
-        <input type="hidden" th:field="*{course.id}" />
-        <input type="hidden" th:field="*{moduleNumber}" />
-        <label>Название модуля</label>
-        <input type="text" th:field="*{name}" class="form-control col-4 mb-4" placeholder="Название" />
-        <button type="submit" class="btn btn-primary col-2">Сохранить</button>
-
-    </form>
-    <hr/>
-    <a th:href="@{/course/{id}/constructor (id = ${module.course.id})}">Обратно к курсу</a>
+    </div>
 </div>
-
 </body>
 </html>

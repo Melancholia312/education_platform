@@ -3,6 +3,8 @@ package com.melancholia.educationplatform.course.step;
 
 import com.melancholia.educationplatform.course.module.Module;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -15,10 +17,12 @@ import java.util.stream.Collectors;
 @Table(name = "test_step")
 @Data
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 public class TestStep extends Step {
 
-    @Column(name = "question", nullable = false)
+    @NotEmpty(message = "Вопрос не может быть пустым")
+    @Size(min = 15, max = 75,  message = "Вопрос должен быть длинной от 15 до 75 символов")
+    @Column(name = "question", nullable = false,  length = 15)
     private String question;
 
     @Column(name = "multi_answers", nullable = false)

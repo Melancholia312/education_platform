@@ -4,7 +4,10 @@ import com.melancholia.educationplatform.course.Course;
 import com.melancholia.educationplatform.course.review.Review;
 import com.melancholia.educationplatform.user.permissions.Privilege;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -29,19 +32,21 @@ public class User implements UserDetails {
     )
     private Long id;
 
-    @Column(name = "username", nullable = false, unique = true)
+    @NotEmpty(message = "Имя пользователя не может быть пустым")
+    @Size(min = 3, max = 75,  message = "Имя пользователя дожно быть длинной от 3 до 75 символов")
+    @Column(name = "username", nullable = false, unique = true, length = 75)
     private String username;
 
-    @Pattern(regexp = "^[a-zA-Z0-9._-]+@[a-zA-Z0-9]+\\.[a-zA-Z]{2,4}$")
-    @Column(name = "email", nullable = false, unique = true)
+    @NotEmpty(message = "Email не может быть пустым")
+    @Size(max = 150,  message = "Email должен быть не больше 150 символов")
+    @Email(message = "Некорректный Email")
+    @Column(name = "email", nullable = false, unique = true, length = 150)
     private String email;
 
+    @NotEmpty(message = "Пароль не может быть пустым")
+    @Size(max = 150,  message = "Пароль должен быть не больше 100 символов")
     @Column(name = "password", length = 100)
     private String password;
-
-    @Pattern(regexp = "^(\\+7|8)\\d{10}$",message = "Формат +7XXXXXXXXXX либо 8XXXXXXXXXX")
-    @Column(name = "phone", unique = true)
-    private String phone;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "users_privileges",
@@ -52,17 +57,10 @@ public class User implements UserDetails {
     private Set<Privilege> privileges = new HashSet<>();
 
     private Boolean locked = false;
-    private Boolean enabled = false;
+    private Boolean enabled = true;
 
     public void addPrivilege(Privilege privilege){
         privileges.add(privilege);
-    }
-
-    public User(String username, String email, String password, String phone) {
-        this.username = username;
-        this.email = email;
-        this.password = password;
-        this.phone = phone;
     }
 
     @Override

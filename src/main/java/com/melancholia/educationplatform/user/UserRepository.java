@@ -9,11 +9,18 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
     User findByEmail(String email);
+    User findByUsername(String username);
     @Transactional
     @Modifying
     @Query("UPDATE User a " +
             "SET a.enabled = TRUE WHERE a.email = ?1")
     int enableAppUser(String email);
+
+    @Transactional
+    @Modifying
+    @Query("UPDATE User a " +
+            "SET a.enabled = FALSE WHERE a.email = ?1")
+    int banAppUser(String email);
 
     @Modifying
     @Query(value = "insert into users_privileges (user_id, privilege_id) VALUES (:userId, :permissionId)", nativeQuery = true)
